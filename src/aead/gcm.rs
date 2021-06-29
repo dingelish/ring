@@ -118,58 +118,58 @@ impl Context {
         let h_table = &self.inner.Htable;
 
         match detect_implementation(self.cpu_features) {
-            #[cfg(target_arch = "x86_64")]
-            Implementation::CLMUL if has_avx_movbe(self.cpu_features) => {
-                extern "C" {
-                    fn GFp_gcm_ghash_avx(
-                        xi: &mut Xi,
-                        Htable: &HTable,
-                        inp: *const u8,
-                        len: crate::c::size_t,
-                    );
-                }
-                unsafe {
-                    GFp_gcm_ghash_avx(xi, h_table, input.as_ptr(), input.len());
-                }
-            }
+            //#[cfg(target_arch = "x86_64")]
+            //Implementation::CLMUL if has_avx_movbe(self.cpu_features) => {
+            //    extern "C" {
+            //        fn GFp_gcm_ghash_avx(
+            //            xi: &mut Xi,
+            //            Htable: &HTable,
+            //            inp: *const u8,
+            //            len: crate::c::size_t,
+            //        );
+            //    }
+            //    unsafe {
+            //        GFp_gcm_ghash_avx(xi, h_table, input.as_ptr(), input.len());
+            //    }
+            //}
 
-            #[cfg(any(
-                target_arch = "aarch64",
-                target_arch = "arm",
-                target_arch = "x86_64",
-                target_arch = "x86"
-            ))]
-            Implementation::CLMUL => {
-                extern "C" {
-                    fn GFp_gcm_ghash_clmul(
-                        xi: &mut Xi,
-                        Htable: &HTable,
-                        inp: *const u8,
-                        len: crate::c::size_t,
-                    );
-                }
-                unsafe {
-                    GFp_gcm_ghash_clmul(xi, h_table, input.as_ptr(), input.len());
-                }
-            }
+            //#[cfg(any(
+            //    target_arch = "aarch64",
+            //    target_arch = "arm",
+            //    target_arch = "x86_64",
+            //    target_arch = "x86"
+            //))]
+            //Implementation::CLMUL => {
+            //    extern "C" {
+            //        fn GFp_gcm_ghash_clmul(
+            //            xi: &mut Xi,
+            //            Htable: &HTable,
+            //            inp: *const u8,
+            //            len: crate::c::size_t,
+            //        );
+            //    }
+            //    unsafe {
+            //        GFp_gcm_ghash_clmul(xi, h_table, input.as_ptr(), input.len());
+            //    }
+            //}
 
-            #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
-            Implementation::NEON => {
-                extern "C" {
-                    fn GFp_gcm_ghash_neon(
-                        xi: &mut Xi,
-                        Htable: &HTable,
-                        inp: *const u8,
-                        len: crate::c::size_t,
-                    );
-                }
-                unsafe {
-                    GFp_gcm_ghash_neon(xi, h_table, input.as_ptr(), input.len());
-                }
-            }
+            //#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+            //Implementation::NEON => {
+            //    extern "C" {
+            //        fn GFp_gcm_ghash_neon(
+            //            xi: &mut Xi,
+            //            Htable: &HTable,
+            //            inp: *const u8,
+            //            len: crate::c::size_t,
+            //        );
+            //    }
+            //    unsafe {
+            //        GFp_gcm_ghash_neon(xi, h_table, input.as_ptr(), input.len());
+            //    }
+            //}
 
-            #[cfg(not(target_arch = "aarch64"))]
-            Implementation::Fallback => {
+            //#[cfg(not(target_arch = "aarch64"))]
+            _ => {
                 gcm_nohw::ghash(xi, h_table.Htable[0], input);
             }
         }
