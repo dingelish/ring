@@ -84,31 +84,33 @@ fn chacha20_poly1305_seal(
                 },
             };
 
-            // Encrypts `plaintext_len` bytes from `plaintext` and writes them to `out_ciphertext`.
-            extern "C" {
-                fn GFp_chacha20_poly1305_seal(
-                    out_ciphertext: *mut u8,
-                    plaintext: *const u8,
-                    plaintext_len: usize,
-                    ad: *const u8,
-                    ad_len: usize,
-                    data: &mut InOut<seal_data_in>,
-                );
-            }
+            //// Encrypts `plaintext_len` bytes from `plaintext` and writes them to `out_ciphertext`.
+            //extern "C" {
+            //    fn GFp_chacha20_poly1305_seal(
+            //        out_ciphertext: *mut u8,
+            //        plaintext: *const u8,
+            //        plaintext_len: usize,
+            //        ad: *const u8,
+            //        ad_len: usize,
+            //        data: &mut InOut<seal_data_in>,
+            //    );
+            //}
 
-            let out = unsafe {
-                GFp_chacha20_poly1305_seal(
-                    in_out.as_mut_ptr(),
-                    in_out.as_ptr(),
-                    in_out.len(),
-                    aad.as_ref().as_ptr(),
-                    aad.as_ref().len(),
-                    &mut data,
-                );
-                &data.out
-            };
+            //let out = unsafe {
+            //    GFp_chacha20_poly1305_seal(
+            //        in_out.as_mut_ptr(),
+            //        in_out.as_ptr(),
+            //        in_out.len(),
+            //        aad.as_ref().as_ptr(),
+            //        aad.as_ref().len(),
+            //        &mut data,
+            //    );
+            //    &data.out
+            //};
 
-            return Tag(out.tag);
+            //return Tag(out.tag);
+            use super::TAG_LEN;
+            return Tag([0;TAG_LEN]);
         }
     }
 
