@@ -194,74 +194,74 @@ fn aead(
     })
 }
 
-// Returns the data that wasn't processed.
-#[cfg(target_arch = "x86_64")]
-#[inline] // Optimize out the match on `direction`.
-fn integrated_aes_gcm<'a>(
-    aes_key: &aes::Key,
-    gcm_ctx: &mut gcm::Context,
-    in_out: &'a mut [u8],
-    ctr: &mut Counter,
-    direction: Direction,
-    cpu_features: cpu::Features,
-) -> &'a mut [u8] {
-    use crate::c;
-
-    if !aes_key.is_aes_hw() || !gcm_ctx.is_avx2(cpu_features) {
-        return in_out;
-    }
-
-    let processed = match direction {
-        Direction::Opening { in_prefix_len } => {
-            extern "C" {
-                fn GFp_aesni_gcm_decrypt(
-                    input: *const u8,
-                    output: *mut u8,
-                    len: c::size_t,
-                    key: &aes::AES_KEY,
-                    ivec: &mut Counter,
-                    gcm: &mut gcm::ContextInner,
-                ) -> c::size_t;
-            }
-            unsafe {
-                GFp_aesni_gcm_decrypt(
-                    in_out[in_prefix_len..].as_ptr(),
-                    in_out.as_mut_ptr(),
-                    in_out.len() - in_prefix_len,
-                    aes_key.inner_less_safe(),
-                    ctr,
-                    gcm_ctx.inner(),
-                )
-            }
-        }
-        Direction::Sealing => {
-            extern "C" {
-                fn GFp_aesni_gcm_encrypt(
-                    input: *const u8,
-                    output: *mut u8,
-                    len: c::size_t,
-                    key: &aes::AES_KEY,
-                    ivec: &mut Counter,
-                    gcm: &mut gcm::ContextInner,
-                ) -> c::size_t;
-            }
-            unsafe {
-                GFp_aesni_gcm_encrypt(
-                    in_out.as_ptr(),
-                    in_out.as_mut_ptr(),
-                    in_out.len(),
-                    aes_key.inner_less_safe(),
-                    ctr,
-                    gcm_ctx.inner(),
-                )
-            }
-        }
-    };
-
-    &mut in_out[processed..]
-}
-
-#[cfg(not(target_arch = "x86_64"))]
+//// Returns the data that wasn't processed.
+//#[cfg(target_arch = "x86_64")]
+//#[inline] // Optimize out the match on `direction`.
+//fn integrated_aes_gcm<'a>(
+//    aes_key: &aes::Key,
+//    gcm_ctx: &mut gcm::Context,
+//    in_out: &'a mut [u8],
+//    ctr: &mut Counter,
+//    direction: Direction,
+//    cpu_features: cpu::Features,
+//) -> &'a mut [u8] {
+//    use crate::c;
+//
+//    if !aes_key.is_aes_hw() || !gcm_ctx.is_avx2(cpu_features) {
+//        return in_out;
+//    }
+//
+//    let processed = match direction {
+//        Direction::Opening { in_prefix_len } => {
+//            extern "C" {
+//                fn GFp_aesni_gcm_decrypt(
+//                    input: *const u8,
+//                    output: *mut u8,
+//                    len: c::size_t,
+//                    key: &aes::AES_KEY,
+//                    ivec: &mut Counter,
+//                    gcm: &mut gcm::ContextInner,
+//                ) -> c::size_t;
+//            }
+//            unsafe {
+//                GFp_aesni_gcm_decrypt(
+//                    in_out[in_prefix_len..].as_ptr(),
+//                    in_out.as_mut_ptr(),
+//                    in_out.len() - in_prefix_len,
+//                    aes_key.inner_less_safe(),
+//                    ctr,
+//                    gcm_ctx.inner(),
+//                )
+//            }
+//        }
+//        Direction::Sealing => {
+//            extern "C" {
+//                fn GFp_aesni_gcm_encrypt(
+//                    input: *const u8,
+//                    output: *mut u8,
+//                    len: c::size_t,
+//                    key: &aes::AES_KEY,
+//                    ivec: &mut Counter,
+//                    gcm: &mut gcm::ContextInner,
+//                ) -> c::size_t;
+//            }
+//            unsafe {
+//                GFp_aesni_gcm_encrypt(
+//                    in_out.as_ptr(),
+//                    in_out.as_mut_ptr(),
+//                    in_out.len(),
+//                    aes_key.inner_less_safe(),
+//                    ctr,
+//                    gcm_ctx.inner(),
+//                )
+//            }
+//        }
+//    };
+//
+//    &mut in_out[processed..]
+//}
+//
+//#[cfg(not(target_arch = "x86_64"))]
 #[inline]
 fn integrated_aes_gcm<'a>(
     _: &aes::Key,
