@@ -117,7 +117,7 @@ pub(crate) mod arm {
             const HWCAP_SHA2: c_ulong = 1 << 3 + OFFSET;
 
             if caps & HWCAP_AES == HWCAP_AES {
-                features |= AES.mask;
+                //features |= AES.mask;
             }
             if caps & HWCAP_PMULL == HWCAP_PMULL {
                 features |= PMULL.mask;
